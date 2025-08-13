@@ -6,14 +6,16 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
-      "@config/*": ["config/*"],
+           "@config/*": ["config/*"],
       "@controllers/*": ["controllers/*"],
       "@services/*": ["services/*"],
-      "@repositories/*": ["repositories/*"],
+      "@repository/*": ["repository/*"],
       "@routes/*": ["routes/*"],
       "@utils/*": ["utils/*"],
       "@mail/*": ["mail/*"],
-      "@middlewares/*": ["middlewares/*"]
+      "@middlewares/*": ["middlewares/*"],
+      "@exceptions/*": ["exceptions/*"],
+      "@prisma/client": ["../generated/prisma"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

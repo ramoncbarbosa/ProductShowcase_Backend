@@ -1,22 +1,25 @@
-import { isAuthenticated } from "../isAuthenticated/isAuthenticated";
-import { isAuthorized } from "../isAuthorized/isAuthorized";
+import { isAuthenticated } from '@middlewares/isAuthenticated/isAuthenticated';
+import { isAuthorized } from '@middlewares/isAuthorized/isAuthorized';
+import { Role } from '@prisma/client';
+import { RequestHandler } from 'express';
 
-class isPermissions {
-  static isAdminOrCoordinator() {
-    return [isAuthenticated, isAuthorized(["admin", "course-coordinator"])];
+class Permissions {
+  static isAdmin(): RequestHandler[] {
+    return [isAuthenticated, isAuthorized([Role.ADMIN, Role.ROOT])];
   }
 
-  static isAdmin() {
-    return [isAuthenticated, isAuthorized(["admin"])];
+  static isRoot(): RequestHandler[] {
+    return [isAuthenticated, isAuthorized([Role.ROOT])];
   }
 
-  static isAuthenticated() {
+  static isAuthenticated(): RequestHandler[] {
     return [isAuthenticated];
   }
 
-  static isAdminProfessorOrCoordinator() {
-    return [isAuthenticated, isAuthorized(["admin", "professor", "course-coordinator"])];
-  }
+  // Você pode adicionar outras permissões aqui
+  // static isAdminProfessorOrCoordinator(): RequestHandler[] {
+  //   return [isAuthenticated, isAuthorized([Role.ADMIN, Role.PROFESSOR, Role.COORDINATOR])];
+  // }
 }
 
-export { isPermissions };
+export { Permissions };

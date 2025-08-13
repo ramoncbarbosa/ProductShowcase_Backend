@@ -1,130 +1,57 @@
-import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { User } from "../../models/User";
-import { Professor } from "../../models/Professor";
-import { AppError } from "../../exceptions/AppError";
+import { Request, Response, NextFunction } from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { PrismaClient, User as PrismaUser } from '../generated/prisma';
+import { AppError } from '@exceptions/AppError/AppError';
 
-/* ---------- tipagem mínima do token ---------- */
+const prisma = new PrismaClient();
+
 interface DecodedToken extends JwtPayload {
   id: string;
-  name: string;
   email: string;
-  role: string | string[];
-  school?: string;
+  role: PrismaUser['role'];
 }
 
-/* ---------- utilitário ---------- */
-function normalizeRoles(roleField: string | string[] | null | undefined): string[] {
-  if (!roleField) return [];
-  if (Array.isArray(roleField)) return roleField.filter(Boolean);
-  return [roleField];
-}
-
-/* ---------- middleware ---------- */
 export async function isAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).json({ error: "Não autenticado: token ausente" });
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(new AppError('Não autenticado: token ausente ou inválido', 401));
   }
 
+  const token = authHeader.split(' ')[1];
+
   try {
-    const secret = process.env.JWT_SECRET || "default_secret";
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET não está definido.');
+    }
+
     const decoded = jwt.verify(token, secret) as DecodedToken;
 
-    console.log("[isAuthenticated] Token decodificado:", {
-      id: decoded.id,
-      name: decoded.name,
-      email: decoded.email,
-      role: decoded.role
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
     });
 
-    /* ---------- ADMIN ---------- */
-    if (normalizeRoles(decoded.role).includes("admin")) {
-      const user = await User.findById(decoded.id);
-      if (!user) {
-        throw new AppError("Usuário admin não encontrado.", 401);
-      }
-
-      // verificação de status para Admin
-      if (user.status !== "active") {
-        throw new AppError("Acesso negado. Sua conta está inativa.", 403);
-      }
-
-      req.user = {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        role: normalizeRoles(decoded.role),
-        school: user.school?.toString() || null,
-        courses: null,
-        classes: null
-      };
-
-      console.log("[isAuthenticated] Admin autenticado:", req.user);
-      return next();
-    }
-
-    /* ---------- PROFESSOR / COORDENADOR ---------- */
-    if (normalizeRoles(decoded.role).some(r => ["professor", "course-coordinator"].includes(r))) {
-      const professor = await Professor
-        .findById(decoded.id)
-        // adicionar 'status' ao select
-        .select("name email role school courses classes status");
-
-      if (!professor) {
-        throw new AppError("Professor não encontrado.", 401);
-      }
-
-      // verificação de status para Professor
-      if (professor.status !== "active") {
-        throw new AppError("Acesso negado. Sua conta está inativa.", 403);
-      }
-
-      req.user = {
-        id: professor._id.toString(),
-        name: professor.name,
-        email: professor.email,
-        role: normalizeRoles(decoded.role),
-        school: professor.school?.toString() || null,
-        courses: professor.courses?.map(c => c.toString()) || [],
-        classes: professor.classes?.map(c => c.toString()) || []
-      };
-
-      console.log("[isAuthenticated] Professor autenticado:", req.user);
-      return next();
-    }
-
-    /* ---------- ESTUDANTE ---------- */
-    const user = await User.findById(decoded.id);
     if (!user) {
-      throw new AppError("Usuário não encontrado.", 401);
+      throw new AppError('Usuário não encontrado.', 401);
     }
 
-    // verificação de status para Estudante
-    if (user.status !== "active") {
-      throw new AppError("Acesso negado. Sua conta está inativa.", 403);
-    }
+    // verificação de status para todos os usuários
+    // TODO: Adicionar um campo de status no model User, se necessário.
+    // if (user.status !== "active") {
+    //   throw new AppError("Acesso negado. Sua conta está inativa.", 403);
+    // }
 
-    req.user = {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: normalizeRoles(decoded.role),
-      school: user.school?.toString() || null,
-      courses: user.course?.toString() || null,
-      classes: user.class?.toString() || null
-    };
-
-    console.log("[isAuthenticated] Usuário autenticado:", req.user);
+    // Adiciona o usuário ao objeto de requisição (req) para uso posterior
+    req.user = user;
     return next();
 
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return next(new AppError("Token inválido.", 401));
+      return next(new AppError('Token inválido.', 401));
     }
     return next(error);
   }
