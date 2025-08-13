@@ -15,11 +15,6 @@ class Permissions {
   static isAuthenticated(): RequestHandler[] {
     return [isAuthenticated];
   }
-
-  // Você pode adicionar outras permissões aqui
-  // static isAdminProfessorOrCoordinator(): RequestHandler[] {
-  //   return [isAuthenticated, isAuthorized([Role.ADMIN, Role.PROFESSOR, Role.COORDINATOR])];
-  // }
 }
 
 export { Permissions };
