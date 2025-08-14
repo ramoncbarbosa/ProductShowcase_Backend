@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13
+    image: postgres:17.5
     restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: catalogo_online
+      POSTGRES_DB: ProductShowcase
     ports:
       - '5432:5432'
     volumes:
