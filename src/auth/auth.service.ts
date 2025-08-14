@@ -4,25 +4,22 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
-
-interface TokenResponse {
-  access_token: string;
-}
+import { User } from '../../generated/prisma';
+import { TokenResponse } from './dto/token-response.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prismaService: PrismaService) { }
 
   async register(data: RegisterDto): Promise<TokenResponse> {
-    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+    const existingUser = await this.prismaService.prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const newUser = await this.prisma.user.create({
+    const newUser = await this.prismaService.prisma.user.create({
       data: {
         ...data,
         password: hashedPassword,
@@ -33,7 +30,7 @@ export class AuthService {
   }
 
   async login(data: LoginDto): Promise<TokenResponse> {
-    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+    const user = await this.prismaService.prisma.user.findUnique({ where: { email: data.email } });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
