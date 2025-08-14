@@ -21,7 +21,7 @@
       "@auth/*": ["src/auth/*"],
       "@common/*": ["src/common/*"],
       "@prisma/client": [
-        "node_modules/@prisma/client"
+        "../generated/prisma"
       ]
     },
     "incremental": true,
