@@ -1,0 +1,75 @@
+classDiagram
+    direction TB
+    class User {
+        +id: String
+        +email: String
+        +password: String
+        +name: String
+        +phone: String
+        +cpf: String?
+        +role: Role
+        +googleId: String?
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+    
+    class Address {
+        +id: String
+        +street: String
+        +number: String
+        +complement: String?
+        +district: String
+        +city: String
+        +state: String
+        +zipCode: String
+        +isPrimary: Boolean
+        +userId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+    
+    class Product {
+        +id: String
+        +name: String
+        +description: String?
+        +price: Float
+        +quantity: Int
+        +imageUrl: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+
+    class Order {
+        +id: String
+        +status: String
+        +totalAmount: Float
+        +userId: String
+        +addressId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+
+    class OrderItem {
+        +id: String
+        +quantity: Int
+        +priceAtPurchase: Float
+        +orderId: String
+        +productId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+
+    class Role {
+        <<enumeration>>
+        USER
+        ADMIN
+        ROOT
+    }
+
+    User "1" -- "0..*" Address : has
+    User "1" -- "0..*" Order : places
+    Address "1" -- "0..*" Order : used for
+    User --> Role : has role
+
+    Order "1" -- "1..*" OrderItem : contains
+    Product "1" -- "0..*" OrderItem : is bought as
