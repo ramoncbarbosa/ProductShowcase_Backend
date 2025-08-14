@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -14,73 +8,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Product {
-  id              String      @id @default(uuid())
-  name            String
-  description     String?
-  price           Float
-  quantity        Int
-  imageUrl        String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  orderItems      OrderItem[] 
-}
-
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  password        String
-  name            String
-  phone           String    @unique
-  cpf             String?   @unique
-  role            Role      @default(USER)
-  googleId        String?   @unique
-  addresses       Address[]
-  orders          Order[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  phone     String    @unique
+  cpf       String?   @unique
+  role      Role      @default(USER)
+  googleId  String?   @unique
+  addresses Address[]
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Address {
-  id              String    @id @default(uuid())
-  street          String
-  number          String
-  complement      String?
-  district        String
-  city            String
-  state           String
-  zipCode         String
-  isPrimary       Boolean   @default(false)
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  orders          Order[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id         String   @id @default(uuid())
+  street     String
+  number     String
+  complement String?
+  district   String
+  city       String
+  state      String
+  zipCode    String
+  isPrimary  Boolean  @default(false)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  orders     Order[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  quantity    Int
+  imageUrl    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  status          String      @default("PENDING")
-  totalAmount     Float
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  addressId       String
-  address         Address     @relation(fields: [addressId], references: [id])
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  orderItems      OrderItem[] // Nova relação com OrderItem
+  id          String      @id @default(uuid())
+  status      String      @default("PENDING")
+  totalAmount Float
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  addressId   String
+  address     Address     @relation(fields: [addressId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
 }
 
 model OrderItem {
-  id              String    @id @default(uuid())
+  id              String   @id @default(uuid())
   quantity        Int
   priceAtPurchase Float
   orderId         String
-  order           Order     @relation(fields: [orderId], references: [id])
+  order           Order    @relation(fields: [orderId], references: [id])
   productId       String
-  product         Product   @relation(fields: [productId], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  product         Product  @relation(fields: [productId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum Role {
