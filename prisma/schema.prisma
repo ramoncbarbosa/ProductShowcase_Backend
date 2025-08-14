@@ -41,14 +41,15 @@ model Address {
 }
 
 model Product {
-  id          String      @id @default(uuid())
+  id          String          @id @default(uuid())
   name        String
   description String?
   price       Float
   quantity    Int
   imageUrl    String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  category    ProductCategory
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   orderItems  OrderItem[]
 }
 
@@ -81,4 +82,10 @@ enum Role {
   USER
   ADMIN
   ROOT
+}
+
+enum ProductCategory {
+  ROUPAS
+  SAUDE
+  JOIAS
 }

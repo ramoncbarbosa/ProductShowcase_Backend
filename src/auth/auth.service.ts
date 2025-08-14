@@ -8,7 +8,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { User } from '../../generated/prisma';
+import { User } from '@prisma/client';
 import { TokenResponse } from './dto/token-response.dto';
 
 @Injectable()
