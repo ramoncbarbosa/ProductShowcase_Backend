@@ -1,6 +1,6 @@
 # dependências
 /node_modules
-
+.idea
 # builds e arquivos gerados
 /dist
 /generated
